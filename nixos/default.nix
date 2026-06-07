@@ -2,7 +2,7 @@
 
 let
   cfg = config.services.juno;
-  repoPath = "/root/juno-repo";
+  repoPath = "/etc/juno";
 
   # ── opencode.jsonc ────────────────────
   opencodeJson = pkgs.writeText "opencode.jsonc" (
