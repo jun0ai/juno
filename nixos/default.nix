@@ -4,6 +4,74 @@ let
   cfg = config.services.juno;
   repoPath = "/var/lib/juno";
 
+  opencodeConfig = pkgs.writeText "opencode.jsonc" (
+    builtins.toJSON {
+      "$schema" = "https://opencode.ai/config.json";
+      instructions = [ "/root/AGENTS.md" ];
+      model = "deepseek/deepseek-v4-pro";
+      plugin = [ "opencode-mem" ];
+      permission = {
+        "*" = "allow";
+        bash = { "*" = "allow"; };
+      };
+      mcp = {
+        searxng = {
+          type = "local";
+          command = [
+            "npx"
+            "-y"
+            "mcp-searxng"
+          ];
+          environment = {
+            SEARXNG_URL = "http://searxng:8888";
+          };
+          enabled = true;
+        };
+      };
+    }
+  );
+
+  opencodeMemConfig = pkgs.writeText "opencode-mem.jsonc" (
+    builtins.toJSON {
+      storagePath = "~/.opencode-mem/data";
+      userEmailOverride = "";
+      userNameOverride = "";
+      embeddingModel = "Xenova/all-MiniLM-L6-v2";
+      webServerEnabled = true;
+      webServerPort = 4747;
+      webServerHost = "127.0.0.1";
+      maxVectorsPerShard = 50000;
+      autoCleanupEnabled = true;
+      autoCleanupRetentionDays = 30;
+      deduplicationEnabled = true;
+      deduplicationSimilarityThreshold = 0.90;
+      memory.defaultScope = "project";
+      opencodeProvider = "deepseek";
+      opencodeModel = "deepseek-chat";
+      autoCaptureEnabled = true;
+      memoryProvider = "openai-chat";
+      memoryModel = "deepseek-chat";
+      memoryApiUrl = "https://api.deepseek.com/v1";
+      memoryApiKey = "env://DEEPSEEK_API_KEY";
+      autoCaptureMaxIterations = 5;
+      autoCaptureIterationTimeout = 30000;
+      aiSessionRetentionDays = 7;
+      memoryTemperature = 0.3;
+      showAutoCaptureToasts = true;
+      showUserProfileToasts = true;
+      showErrorToasts = true;
+      userProfileAnalysisInterval = 10;
+      userProfileMaxPreferences = 20;
+      userProfileMaxPatterns = 15;
+      userProfileMaxWorkflows = 10;
+      userProfileConfidenceDecayDays = 30;
+      userProfileChangelogRetentionCount = 5;
+      similarityThreshold = 0.6;
+      maxMemories = 10;
+      injectProfile = true;
+    }
+  );
+
 in {
   options.services.juno = {
     enable = lib.mkEnableOption "Juno autonomous sidekick";
@@ -59,10 +127,10 @@ in {
     '';
 
     # ═══════════════════════════════════════
-    # Repo + symlinks + auth
+    # Repo + auth seeding
     # ═══════════════════════════════════════
     system.activationScripts.junoRepo = ''
-      # Clone/update Juno config repo
+      # Clone/update Juno config repo (SOUL.md, AGENTS.md, skills, bridge)
       if [ ! -d ${repoPath}/.git ]; then
         echo "Cloning juno repo..."
         ${pkgs.git}/bin/git clone https://github.com/jun0ai/juno.git ${repoPath}
@@ -81,23 +149,27 @@ in {
       AEOF
         chmod 600 /root/.local/share/opencode/auth.json
       fi
-
-      # Symlink config from the repo (runs after clone, so target always exists)
-      ln -sf ${repoPath}/config/SOUL.md /root/SOUL.md
-      ln -sf ${repoPath}/config/AGENTS.md /root/AGENTS.md
-      ln -sf ${repoPath}/config/opencode.jsonc /root/.config/opencode/opencode.jsonc
-      ln -sf ${repoPath}/config/opencode-mem.jsonc /root/.config/opencode/opencode-mem.jsonc
-      ln -sf ${repoPath}/bridge /root/projects/juno-bridge
-
-      mkdir -p /root/.config/opencode/skills/nixos
-      mkdir -p /root/.config/opencode/skills/find-skills
-      mkdir -p /root/.config/opencode/skills/web-search
-      ln -sf ${repoPath}/config/skills/nixos/SKILL.md /root/.config/opencode/skills/nixos/SKILL.md
-      ln -sf ${repoPath}/config/skills/find-skills/SKILL.md /root/.config/opencode/skills/find-skills/SKILL.md
-      ln -sf ${repoPath}/config/skills/web-search/SKILL.md /root/.config/opencode/skills/web-search/SKILL.md
     '';
 
-    # All config files are handled by activation script above
+    # ═══════════════════════════════════════
+    # File provisioning
+    # ═══════════════════════════════════════
+    # Static config files are baked into the Nix closure via writeText.
+    # Content files (SOUL.md, AGENTS.md, skills, bridge) are symlinked
+    # from the git repo so they can evolve independently of nix rebuilds.
+    systemd.tmpfiles.rules = [
+      # ── Config files (Nix-managed, no git dependency) ──
+      "f /root/.config/opencode/opencode.jsonc 0644 root root - ${opencodeConfig}"
+      "f /root/.config/opencode/opencode-mem.jsonc 0644 root root - ${opencodeMemConfig}"
+
+      # ── Content from git repo ──
+      "L+ /root/SOUL.md - - - - ${repoPath}/config/SOUL.md"
+      "L+ /root/AGENTS.md - - - - ${repoPath}/config/AGENTS.md"
+      "L+ /root/projects/juno-bridge - - - - ${repoPath}/bridge"
+      "L+ /root/.config/opencode/skills/nixos/SKILL.md - - - - ${repoPath}/config/skills/nixos/SKILL.md"
+      "L+ /root/.config/opencode/skills/find-skills/SKILL.md - - - - ${repoPath}/config/skills/find-skills/SKILL.md"
+      "L+ /root/.config/opencode/skills/web-search/SKILL.md - - - - ${repoPath}/config/skills/web-search/SKILL.md"
+    ];
 
     # ═══════════════════════════════════════
     # opencode environment
