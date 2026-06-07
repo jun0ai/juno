@@ -47,6 +47,7 @@ in {
     environment.variables = {
       EDITOR = "nvim";
       SHELL = "${pkgs.fish}/bin/fish";
+      LD_LIBRARY_PATH = "${pkgs.gcc.cc.lib}/lib";
     };
 
     # ═══════════════════════════════════════
@@ -127,7 +128,10 @@ in {
       serviceConfig = {
         Type = "simple";
         WorkingDirectory = "/workspace";
-        Environment = [ "HOME=/root" ];
+        Environment = [
+          "HOME=/root"
+          "LD_LIBRARY_PATH=${pkgs.gcc.cc.lib}/lib"
+        ];
         EnvironmentFile = "/run/opencode-env";
         ExecStart = "${pkgs.opencode}/bin/opencode serve --hostname 0.0.0.0 --port 4096";
         Restart = "always";

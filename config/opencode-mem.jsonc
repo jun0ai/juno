@@ -111,9 +111,9 @@
   "memoryProvider": "openai-chat",
   
   // REQUIRED for auto-capture (all 3 must be set):
-  "memoryModel": "gpt-4o-mini",
-  "memoryApiUrl": "https://api.openai.com/v1",
-  "memoryApiKey": "sk-...",
+  "memoryModel": "deepseek-chat",
+  "memoryApiUrl": "https://api.deepseek.com/v1",
+  "memoryApiKey": "env://DEEPSEEK_API_KEY",
 
   // API Key Formats:
   // Direct value:        "sk-..."
