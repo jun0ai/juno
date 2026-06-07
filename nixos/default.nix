@@ -251,6 +251,7 @@ in {
     # ═══════════════════════════════════════
     networking.firewall.allowedTCPPorts = [
       22     # SSH
+      3000   # Juno UI
       4096   # OpenCode
     ];
   };
