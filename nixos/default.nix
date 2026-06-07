@@ -127,6 +127,7 @@ in {
       wantedBy = [ "multi-user.target" ];
       after = [ "network-online.target" "opencode-env.service" ];
       requires = [ "opencode-env.service" ];
+      wants = [ "network-online.target" ];
       serviceConfig = {
         Type = "simple";
         WorkingDirectory = "/workspace";
@@ -146,6 +147,7 @@ in {
       documentation = [ "https://t.me/jun0aibot" ];
       after = [ "network-online.target" "opencode-server.service" ];
       requires = [ "opencode-server.service" ];
+      wants = [ "network-online.target" ];
       wantedBy = [ "multi-user.target" ];
 
       preStart = ''
