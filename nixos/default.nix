@@ -87,20 +87,25 @@ in {
         echo "Cloning juno repo..."
         ${pkgs.git}/bin/git clone https://github.com/jun0ai/juno.git ${repoPath}
       fi
+
+      # Symlink config from the repo (runs after clone, so target always exists)
+      ln -sf ${repoPath}/config/SOUL.md /root/SOUL.md
+      ln -sf ${repoPath}/config/AGENTS.md /root/AGENTS.md
+      ln -sf ${repoPath}/config/opencode-mem.jsonc /root/.config/opencode/opencode-mem.jsonc
+      ln -sf ${repoPath}/bridge /root/projects/juno-bridge
+
+      mkdir -p /root/.config/opencode/skills/nixos
+      mkdir -p /root/.config/opencode/skills/find-skills
+      mkdir -p /root/.config/opencode/skills/web-search
+      ln -sf ${repoPath}/config/skills/nixos/SKILL.md /root/.config/opencode/skills/nixos/SKILL.md
+      ln -sf ${repoPath}/config/skills/find-skills/SKILL.md /root/.config/opencode/skills/find-skills/SKILL.md
+      ln -sf ${repoPath}/config/skills/web-search/SKILL.md /root/.config/opencode/skills/web-search/SKILL.md
     '';
 
     systemd.tmpfiles.rules = [
-      # opencode main config (managed, not agent-editable)
+      # opencode main config — symlink to nix store (always exists)
       "L+ /root/.config/opencode/opencode.jsonc - - - - ${opencodeJson}"
-
-      # Agent-editable files — symlinked from live repo clone
-      "L+ /root/SOUL.md - - - - ${repoPath}/config/SOUL.md"
-      "L+ /root/AGENTS.md - - - - ${repoPath}/config/AGENTS.md"
-      "L+ /root/.config/opencode/opencode-mem.jsonc - - - - ${repoPath}/config/opencode-mem.jsonc"
-      "L+ /root/.config/opencode/skills/nixos/SKILL.md - - - - ${repoPath}/config/skills/nixos/SKILL.md"
-      "L+ /root/.config/opencode/skills/find-skills/SKILL.md - - - - ${repoPath}/config/skills/find-skills/SKILL.md"
-      "L+ /root/.config/opencode/skills/web-search/SKILL.md - - - - ${repoPath}/config/skills/web-search/SKILL.md"
-      "L+ /root/projects/juno-bridge - - - - ${repoPath}/bridge"
+      # Agent-editable files are handled by activation script above
     ];
 
     # ═══════════════════════════════════════
