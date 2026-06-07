@@ -149,6 +149,10 @@ in {
       wantedBy = [ "multi-user.target" ];
 
       preStart = ''
+        # Kill any competing bridge on this token (from previous launch)
+        ${pkgs.procps}/bin/pkill -f "bun run src/index" 2>/dev/null || true
+        sleep 1
+
         ${pkgs.bun}/bin/bun install --cwd ${repoPath}/bridge
         printf 'TELEGRAM_BOT_TOKEN=%s\n' "$(tr -d '\n' < ${cfg.telegramBotTokenPath})" > /run/juno-bridge-env
         chmod 600 /run/juno-bridge-env
