@@ -92,8 +92,8 @@
    //   OpenAI (API key):          "opencodeProvider": "openai",          "opencodeModel": "gpt-4o-mini"
    //   GitHub Copilot:            "opencodeProvider": "github-copilot",  "opencodeModel": "gpt-4o-mini"
    //
-    "opencodeProvider": "deepseek",
-    "opencodeModel": "deepseek-chat",
+    // "opencodeProvider": "deepseek",
+    // "opencodeModel": "deepseek-chat",
 
    // ============================================
    // Auto-Capture Settings (REQUIRES EXTERNAL API)
