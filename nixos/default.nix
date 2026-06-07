@@ -4,28 +4,6 @@ let
   cfg = config.services.juno;
   repoPath = "/var/lib/juno";
 
-  # ── opencode.jsonc ────────────────────
-  opencodeJson = pkgs.writeText "opencode.jsonc" (
-    builtins.toJSON {
-      "$schema" = "https://opencode.ai/config.json";
-      model = "deepseek/deepseek-v4-pro";
-      instructions = [ "/root/AGENTS.md" ];
-      plugin = [ "opencode-mem" ];
-      permission = {
-        "*" = "allow";
-        bash = { "*" = "allow"; };
-      };
-      mcp = {
-        searxng = {
-          type = "local";
-          command = [ "npx" "-y" "mcp-searxng" ];
-          environment = { SEARXNG_URL = "http://searxng:8888"; };
-          enabled = true;
-        };
-      };
-    }
-  );
-
 in {
   options.services.juno = {
     enable = lib.mkEnableOption "Juno autonomous sidekick";
@@ -106,6 +84,7 @@ in {
       # Symlink config from the repo (runs after clone, so target always exists)
       ln -sf ${repoPath}/config/SOUL.md /root/SOUL.md
       ln -sf ${repoPath}/config/AGENTS.md /root/AGENTS.md
+      ln -sf ${repoPath}/config/opencode.jsonc /root/.config/opencode/opencode.jsonc
       ln -sf ${repoPath}/config/opencode-mem.jsonc /root/.config/opencode/opencode-mem.jsonc
       ln -sf ${repoPath}/bridge /root/projects/juno-bridge
 
@@ -117,11 +96,7 @@ in {
       ln -sf ${repoPath}/config/skills/web-search/SKILL.md /root/.config/opencode/skills/web-search/SKILL.md
     '';
 
-    systemd.tmpfiles.rules = [
-      # opencode main config — symlink to nix store (always exists)
-      "L+ /root/.config/opencode/opencode.jsonc - - - - ${opencodeJson}"
-      # Agent-editable files are handled by activation script above
-    ];
+    # All config files are handled by activation script above
 
     # ═══════════════════════════════════════
     # opencode environment

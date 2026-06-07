@@ -26,10 +26,10 @@ Import in your host NixOS config:
 
 | File | Behavior |
 |---|---|
-| `~/.config/opencode/opencode.jsonc` | Managed by host (L+ symlink) |
-| `~/.config/opencode/opencode-mem.jsonc` | Seeded on first boot, agent-editable |
-| `/root/SOUL.md` | Seeded on first boot, agent-editable |
-| `/root/AGENTS.md` | Seeded on first boot, agent-editable |
-| `~/.config/opencode/skills/*/SKILL.md` | Seeded on first boot, agent-editable |
+| `~/.config/opencode/opencode.jsonc` | Symlinked from repo (`config/opencode.jsonc`) |
+| `~/.config/opencode/opencode-mem.jsonc` | Symlinked from repo (`config/opencode-mem.jsonc`) |
+| `/root/SOUL.md` | Symlinked from repo (`config/SOUL.md`) |
+| `/root/AGENTS.md` | Symlinked from repo (`config/AGENTS.md`) |
+| `~/.config/opencode/skills/*/SKILL.md` | Symlinked from repo (`config/skills/*/SKILL.md`) |
 
-Editable files use `[ -f ] || write` — never overwritten on rebuild.
+All files in `config/` are the source of truth. Editing them in the repo and committing/pushing deploys changes on next rebuild.
