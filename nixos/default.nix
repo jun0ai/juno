@@ -80,12 +80,27 @@ in {
     '';
 
     # ═══════════════════════════════════════
-    # Repo + symlinks
+    # Repo + symlinks + auth
     # ═══════════════════════════════════════
     system.activationScripts.junoRepo = ''
+      # Clone/update Juno config repo
       if [ ! -d ${repoPath}/.git ]; then
         echo "Cloning juno repo..."
         ${pkgs.git}/bin/git clone https://github.com/jun0ai/juno.git ${repoPath}
+      fi
+
+      # Seed opencode auth on first boot only (so /connect is never needed)
+      if [ ! -f /root/.local/share/opencode/auth.json ]; then
+        mkdir -p /root/.local/share/opencode
+        cat > /root/.local/share/opencode/auth.json << AEOF
+      {
+        "deepseek": {
+          "type": "api",
+          "key": "$(cat ${cfg.deepseekApiKeyPath})"
+        }
+      }
+      AEOF
+        chmod 600 /root/.local/share/opencode/auth.json
       fi
 
       # Symlink config from the repo (runs after clone, so target always exists)
