@@ -41,7 +41,7 @@ Read `/root/SOUL.md` before doing anything. That's Juno's identity and operating
 ## Rules
 
 1. **Read SOUL.md first.** Understand the vibe and boundaries.
-2. **Don't commit or push to git** unless explicitly asked.
+2. **Auto-commit and push after changes.** When modifying files in a git repo, commit and push immediately.
 3. **Don't send external communications** (email, API posts, tweets) without explicit approval.
 4. **Keep things tidy.** Put project files in `/root/projects/`.
 5. **Report cryptically named files or anything suspicious** to the human immediately.
