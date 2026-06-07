@@ -8,6 +8,7 @@ let
   opencodeJson = pkgs.writeText "opencode.jsonc" (
     builtins.toJSON {
       "$schema" = "https://opencode.ai/config.json";
+      model = "deepseek/deepseek-v4-pro";
       instructions = [ "/root/AGENTS.md" ];
       plugin = [ "opencode-mem" ];
       permission = {
